@@ -94,8 +94,7 @@ class _MainPageState extends State<MainPage> {
       'GPSLatitude': lat,
       'GPSLatitudeRef': lat > 0 ? "N" : "S",
       'GPSLongitude': long,
-      'GPSLongitudeRef': long > 0 ? "E" : "W",
-      'GPSAltitude': position.altitude
+      'GPSLongitudeRef': long > 0 ? "E" : "W"
     });
 
     await exif.close();
@@ -109,41 +108,38 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        child: MaterialButton(
-          onPressed: () async => await _tagImage(context),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Image.asset(
-                      "assets/pin.png",
-                      alignment: Alignment.center,
-                      width: 82,
-                    ),
+      body: MaterialButton(
+        onPressed: () async => await _tagImage(context),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Image.asset(
+                    "assets/pin.png",
+                    alignment: Alignment.center,
+                    width: 82,
                   ),
-                  _isLoading
-                      ? const SizedBox(
-                          height: 48,
-                          width: 48,
-                          child: CircularProgressIndicator(color: Colors.black),
-                        )
-                      : SizedBox(
-                          height: 48,
-                          child: Text(_result,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 18)),
-                        ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                _isLoading
+                    ? const SizedBox(
+                        height: 48,
+                        width: 48,
+                        child: CircularProgressIndicator(color: Colors.black),
+                      )
+                    : SizedBox(
+                        height: 48,
+                        child: Text(_result,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 18)),
+                      ),
+              ],
+            ),
+          ],
         ),
       ),
     );
