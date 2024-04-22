@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:geo_tagger/di.dart';
 import 'package:geo_tagger/map_page.dart';
 import 'package:geo_tagger/repositories/position_repository.dart';
@@ -43,6 +42,8 @@ class _MainPageState extends State<MainPage> {
   final _picker = ImagePicker();
 
   bool _isLoading = false;
+
+  late final Future<bool> _locationCanBeFetched = _positionRepository.locationCanBeFetched();
 
   void _setLoadingState(bool isLoading) {
     setState(() {
@@ -102,8 +103,9 @@ class _MainPageState extends State<MainPage> {
 
     var position = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const MapPage(),
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => const MapPage(),
+        transitionDuration: Duration.zero,
       ),
     );
 
@@ -166,7 +168,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   FutureBuilder<bool>(
-                    future: _positionRepository.locationCanBeFetched(),
+                    future: _locationCanBeFetched,
                     builder: (context, snapshot) => MaterialButton(
                       onPressed: snapshot.data == true ? _tagImageToCurrentPosition : null,
                       color: Colors.white,
@@ -178,7 +180,7 @@ class _MainPageState extends State<MainPage> {
                           Icon(Icons.location_on),
                           SizedBox(width: 6),
                           Text(
-                            "Use current position",
+                            "Use my position",
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 18),
                           ),
