@@ -1,4 +1,4 @@
-package com.example.geo_tagger
+package com.nerrix.geo_tagger
 
 import io.flutter.embedding.android.FlutterActivity
 

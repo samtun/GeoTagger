@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:geo_tagger/di.dart';
+import 'package:geo_tagger/map_page.dart';
+import 'package:geo_tagger/repositories/position_repository.dart';
 import 'package:native_exif/native_exif.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
-void main() {
+Future main() async {
+  setupDependencies();
   runApp(const GeoTagger());
 }
 
@@ -33,25 +39,10 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final PositionRepository _positionRepository = getIt<PositionRepository>();
   final _picker = ImagePicker();
-  String _result = "Tap to tag";
+
   bool _isLoading = false;
-
-  Future<Position> _determinePosition() async {
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw ('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw ('Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    return await Geolocator.getCurrentPosition();
-  }
 
   void _setLoadingState(bool isLoading) {
     setState(() {
@@ -59,7 +50,7 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  Future _tagImage(BuildContext context) async {
+  Future _tagImageToCurrentPosition() async {
     if (_isLoading) {
       return false;
     }
@@ -70,17 +61,15 @@ class _MainPageState extends State<MainPage> {
         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
 
     if (pickerImage == null) {
-      _result = "Tap to tag";
       _setLoadingState(false);
       return;
     }
 
     Position? position;
     try {
-      position = await _determinePosition();
+      position = await _positionRepository.getCurrentPosition();
     } catch (e) {
       debugPrint(e.toString());
-      _result = "Error";
       _setLoadingState(false);
       return;
     }
@@ -99,7 +88,51 @@ class _MainPageState extends State<MainPage> {
 
     await exif.close();
 
-    _result = "Tagged to\n(${position.latitude}, ${position.longitude})";
+    _setLoadingState(false);
+
+    await Share.shareXFiles([XFile(pickerImage.path)]);
+  }
+
+  Future _tagImageToMapLocation() async {
+    if (_isLoading) {
+      return false;
+    }
+
+    _setLoadingState(true);
+
+    var position = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MapPage(),
+      ),
+    );
+
+    if (position == null) {
+      _setLoadingState(false);
+      return;
+    }
+
+    final pickerImage = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
+
+    if (pickerImage == null) {
+      _setLoadingState(false);
+      return;
+    }
+
+    var exif = await Exif.fromPath(pickerImage.path);
+
+    final lat = position.latitude;
+    final long = position.longitude;
+
+    await exif.writeAttributes({
+      'GPSLatitude': lat,
+      'GPSLatitudeRef': lat > 0 ? "N" : "S",
+      'GPSLongitude': long,
+      'GPSLongitudeRef': long > 0 ? "E" : "W"
+    });
+
+    await exif.close();
+
     _setLoadingState(false);
 
     await Share.shareXFiles([XFile(pickerImage.path)]);
@@ -107,39 +140,73 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: MaterialButton(
-        onPressed: () async => await _tagImage(context),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Image.asset(
-                    "assets/pin.png",
-                    alignment: Alignment.center,
-                    width: 82,
-                  ),
-                ),
-                _isLoading
-                    ? const SizedBox(
-                        height: 48,
-                        width: 48,
-                        child: CircularProgressIndicator(color: Colors.black),
-                      )
-                    : SizedBox(
-                        height: 48,
-                        child: Text(_result,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18)),
-                      ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/map_sepia.jpg"),
+              opacity: 0.7,
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Image.asset(
+                      "assets/pin.png",
+                      alignment: Alignment.center,
+                      width: 82,
+                    ),
+                  ),
+                  FutureBuilder<bool>(
+                    future: _positionRepository.locationCanBeFetched(),
+                    builder: (context, snapshot) => MaterialButton(
+                      onPressed: snapshot.data == true ? _tagImageToCurrentPosition : null,
+                      color: Colors.white,
+                      disabledColor: Colors.white,
+                      disabledElevation: 1,
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.location_on),
+                          SizedBox(width: 6),
+                          Text(
+                            "Use current position",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  MaterialButton(
+                    onPressed: _tagImageToMapLocation,
+                    color: Colors.white,
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.map),
+                        SizedBox(width: 6),
+                        Text(
+                          "Use map location",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
