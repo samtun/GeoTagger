@@ -202,7 +202,6 @@ fabric.properties
 
 ### macOS ###
 # General
-.DS_Store
 .AppleDouble
 .LSOverride
 
@@ -211,14 +210,11 @@ Icon
 
 
 # Thumbnails
-._*
 
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
-.Spotlight-V100
 .TemporaryItems
-.Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
@@ -229,4 +225,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-.env
+# End of https://www.toptal.com/developers/gitignore/api/flutter,androidstudio
+
+*.env
+*api.properties
