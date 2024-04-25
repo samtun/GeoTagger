@@ -30,7 +30,7 @@ if (apiPropertiesFile.exists()) {
     }
 }
 
-def googleMapsApiKey = System.getenv("REACT_NATIVE_API_KEY_GOOGLE_MAPS")
+def googleMapsApiKey = System.getenv("maps.api.key")
 
 if ( googleMapsApiKey == null) {
     googleMapsApiKey = apiProperties.getProperty('maps.api.key')
