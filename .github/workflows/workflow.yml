@@ -14,5 +14,5 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.19.0
-        - run: flutter pub get
-        - run: flutter build apk --release
+      - run: flutter pub get
+      - run: flutter build apk --release
