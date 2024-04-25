@@ -1,0 +1,45 @@
+name: Build app
+run-name: Build flutter release apk 🐦
+on:
+  push:
+    branches:
+      - master
+      - workflow
+jobs:
+  build-release-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'oracle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.19.x
+          cache: true
+
+      - name: Flutter info
+        run: |
+          dart --version
+          flutter --version
+
+      - name: Get flutter dependencies
+        run: flutter pub get
+
+      - name: Build flutter release apk
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+        run: flutter build apk --release
+
+      - name: Upload apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk

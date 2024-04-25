@@ -29,8 +29,10 @@ if (apiPropertiesFile.exists()) {
         apiProperties.load(reader)
     }
 }
-
-var googleMapsApiKey = apiProperties.getProperty('maps.api.key')
+def googleMapsApiKey = System.getenv('MAPS_API_KEY')
+if (googleMapsApiKey == null) {
+    googleMapsApiKey = apiProperties.getProperty('maps.api.key')
+}
 
 android {
     namespace "com.nerrix.geo_tagger"
@@ -44,6 +46,11 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        checkReleaseBuilds false
     }
 
     sourceSets {
