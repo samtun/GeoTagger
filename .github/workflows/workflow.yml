@@ -14,10 +14,12 @@ jobs:
         with:
          distribution: 'zulu'
          java-version: 12.0
+         cache: 'gradle'
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
         with:
           channel: stable
           version: 3.19.0
+          cache: true
       - run: flutter pub get
       - run: flutter build apk --release -v
