@@ -30,7 +30,7 @@ if (apiPropertiesFile.exists()) {
     }
 }
 
-googleMapsApiKey = apiProperties.getProperty('maps.api.key')
+def googleMapsApiKey = apiProperties.getProperty('maps.api.key')
 
 android {
     namespace "com.nerrix.geo_tagger"
