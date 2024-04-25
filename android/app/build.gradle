@@ -30,7 +30,11 @@ if (apiPropertiesFile.exists()) {
     }
 }
 
-var googleMapsApiKey = apiProperties.getProperty('maps.api.key')
+def googleMapsApiKey = System.getenv("REACT_NATIVE_API_KEY_GOOGLE_MAPS")
+
+if ( googleMapsApiKey == null) {
+    googleMapsApiKey = apiProperties.getProperty('maps.api.key')
+}
 
 android {
     namespace "com.nerrix.geo_tagger"
@@ -50,7 +54,7 @@ android {
         disable 'InvalidPackage'
         checkReleaseBuilds false
     }
-    
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
