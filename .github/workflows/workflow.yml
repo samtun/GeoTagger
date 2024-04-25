@@ -8,9 +8,6 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
 
-      - name: Get secrets
-        run: echo "${{ secrets.API_PROPERTIES }}" > $GITHUB_WORKSPACE/api.properties
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -30,4 +27,8 @@ jobs:
           flutter --version
 
       - run: flutter pub get
-      - run: flutter build apk --release
+
+      - name: build flutter release apk
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+        run: flutter build apk --release
