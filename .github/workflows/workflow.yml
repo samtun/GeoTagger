@@ -3,7 +3,7 @@ run-name: Build flutter release apk 🐦
 on:
   push:
     branches:
-      - master
+      - main
       - workflow
 jobs:
   build-release-apk:
