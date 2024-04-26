@@ -1,5 +1,7 @@
 # GeoTagger
 
+https://github.com/samtun/GeoTagger/actions/workflows/workflow.yml/badge.svg?branch=main
+
 An app for tagging images with a geo location. It offers two ways of doing so:
 * Current location
 * Map location
