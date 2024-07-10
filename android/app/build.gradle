@@ -29,6 +29,7 @@ if (apiPropertiesFile.exists()) {
         apiProperties.load(reader)
     }
 }
+
 def googleMapsApiKey = System.getenv('MAPS_API_KEY')
 if (googleMapsApiKey == null) {
     googleMapsApiKey = apiProperties.getProperty('maps.api.key')
@@ -37,7 +38,7 @@ if (googleMapsApiKey == null) {
 android {
     namespace "com.nerrix.geo_tagger"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    ndkVersion "26.1.10909125"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
