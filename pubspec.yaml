@@ -2,7 +2,7 @@ name: geo_tagger
 description: "A GPS tagging app for images."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.0+3
+version: 1.2.1+4
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
